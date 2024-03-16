@@ -192,7 +192,7 @@ void GPSClass::wakeup()
 
 void GPSClass::poll()
 {
-  if (_stream->available()) {
+  while (_stream->available()) {
     char c = _stream->read();
 
 #ifdef GPS_DEBUG
@@ -222,19 +222,17 @@ void GPSClass::parseBuffer()
   switch (sentenceId) {
     case MINMEA_SENTENCE_RMC: {
       struct minmea_sentence_rmc frame;
-      
-      if (minmea_parse_rmc(&frame, _buffer) && frame.valid) {
+ 
+      if (minmea_parse_rmc(&frame, _buffer)) {
         _latitude = minmea_tofloat(&frame.latitude);
         _longitude = minmea_tofloat(&frame.longitude);
         _speed = minmea_tofloat(&frame.speed);
         _course = minmea_tofloat(&frame.course);
         _variation = minmea_tofloat(&frame.variation);
-
+        _ts.tv_sec = 0;
         minmea_gettime(&_ts, &frame.date, &frame.time);
-
-        _available |= GPS_MASK_RMC;
+        _available |= (GPS_MASK_RMC * frame.valid);
       }
-
       break;
     }
 
