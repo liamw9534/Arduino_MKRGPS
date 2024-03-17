@@ -52,7 +52,9 @@ int GPSClass::begin(int mode)
   delay(100); // delay for GPS to wakeup
 
   if (_mode == GPS_MODE_UART) {
+#if DEBUG_PORT != Serial1
     _serial->begin(_baudrate);
+#endif
     _stream = _serial;
   } else {
     if (!_serialDDC->begin(_clockRate)) {
@@ -73,10 +75,14 @@ int GPSClass::begin(int mode)
 void GPSClass::end()
 {
   digitalWrite(_extintPin, LOW);
+#ifndef GPS_EXTINT_NOPULL
   pinMode(_extintPin, INPUT);
+#endif
 
   if (_mode == GPS_MODE_UART) {
+#if DEBUG_PORT != Serial1
     _serial->end();
+#endif
   } else {
     _serialDDC->end();
   }
