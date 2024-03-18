@@ -27,6 +27,10 @@ extern "C" {
 
 #include "GPS.h"
 
+#ifdef SHARED_PORT
+#include "../../../../../include/SharedSerial.h"
+#endif
+
 #define GPS_MASK_RMC 0x01
 #define GPS_MASK_GGA 0x02
 
@@ -52,9 +56,7 @@ int GPSClass::begin(int mode)
   delay(100); // delay for GPS to wakeup
 
   if (_mode == GPS_MODE_UART) {
-#if DEBUG_PORT != Serial1 || DEBUG_LEVEL == 0
     _serial->begin(_baudrate);
-#endif
     _stream = _serial;
   } else {
     if (!_serialDDC->begin(_clockRate)) {
@@ -80,9 +82,7 @@ void GPSClass::end()
 #endif
 
   if (_mode == GPS_MODE_UART) {
-#if DEBUG_PORT != Serial1 || DEBUG_LEVEL == 0
     _serial->end();
-#endif
   } else {
     _serialDDC->end();
   }
@@ -202,7 +202,9 @@ void GPSClass::poll()
     char c = _stream->read();
 
 #ifdef GPS_DEBUG
-    Serial.print(c);
+    DEBUG_PORT.print("GPS -> App: ");
+    DEBUG_PORT.print(c);
+    DEBUG_PORT.print("\n");
 #endif
 
     if (c == '$') {
@@ -300,4 +302,5 @@ float GPSClass::toDegrees(float f)
 }
 
 static SerialDDC serialDDC(Wire, 0x42, 0xfd, 0xff);
-GPSClass GPS(Serial1, 9600, serialDDC, 400000, 7);
+
+GPSClass GPS(GPS_PORT, 9600, serialDDC, 400000, 7);
