@@ -51,7 +51,7 @@ public:
 
   unsigned long getTime();
 
-  void standby();
+  bool prepareStandby();
   void wakeup();
 
 private:

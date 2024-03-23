@@ -154,7 +154,7 @@ unsigned long GPSClass::getTime()
   return _ts.tv_sec;
 }
 
-void GPSClass::standby()
+bool GPSClass::prepareStandby()
 {
   byte payload[48];
 
@@ -167,8 +167,23 @@ void GPSClass::standby()
   //       extintBackup = enabled, force receiver into BACKUP mode when selected EXTINT pin is 'low' 
   payload[4] = 0x60;
 
-  sendUbx(0x06, 0x3b, payload, sizeof(payload));
+  int retries = 5;
 
+  // Flush input buffer
+  while (_stream->available()) {
+    (void)_stream->read();
+  }
+
+  while (retries-- > 0) {
+    sendUbx(0x06, 0x3b, payload, sizeof(payload));
+    delay(300);
+    while (_stream->available()) {
+      if (_stream->read() == 0xb5)
+        return true;
+    }
+  }
+  return false;
+#if 0
   if (_mode == GPS_MODE_UART) {
     _serial->end();
   } else {
@@ -179,6 +194,7 @@ void GPSClass::standby()
 
   _available = 0;
   _index = 0;
+#endif
 }
 
 void GPSClass::wakeup()
