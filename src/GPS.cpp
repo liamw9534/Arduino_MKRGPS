@@ -178,7 +178,10 @@ bool GPSClass::prepareStandby()
     sendUbx(0x06, 0x3b, payload, sizeof(payload));
     delay(300);
     while (_stream->available()) {
-      if (_stream->read() == 0xb5)
+      if (_stream->read() == 0xb5 &&
+          _stream->read() == 0x62 &&
+          _stream->read() == 0x05 &&
+          _stream->read() == 0x01)
         return true;
     }
   }
