@@ -78,6 +78,8 @@ void GPSClass::end()
 {
   if (_mode == GPS_MODE_UART) {
     _serial->end();
+    pinMode(13, INPUT_PULLUP);
+    pinMode(14, INPUT_PULLUP);
   } else {
     _serialDDC->end();
   }
