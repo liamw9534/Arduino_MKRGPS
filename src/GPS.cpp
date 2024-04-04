@@ -68,6 +68,7 @@ int GPSClass::begin(int mode)
     _stream = _serialDDC;
   }
 
+  _ts.tv_sec = 0;
   _available = 0;
   _index = 0;
 
